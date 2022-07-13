@@ -15,29 +15,54 @@ public class Communication {
 
     @Autowired
     private RestTemplate restTemplate;
+
     private final String URL = "http://localhost:8080/rest/api/employees";
 
 
-    public List<Employee> showAllEmployees (){
+    public List<Employee> getAllEmployees (){
 
-        ResponseEntity<List<Employee>> responseEntity = restTemplate.exchange(URL, HttpMethod.GET, null,
-                new ParameterizedTypeReference<List<Employee>>() { });
+        ResponseEntity<List<Employee>> responseEntity = restTemplate.exchange(URL
+                , HttpMethod.GET
+                , null
+                , new ParameterizedTypeReference<List<Employee>>() { });
 
-        //из responseEntity получить полезную нагрузку
+//        из responseEntity получить полезную нагрузку
+        List<Employee> allEmployees = responseEntity.getBody();
 
-        return  null;
+        return  allEmployees;
     }
 
     public Employee getEmployee(int id){
 
-        return null;
+        //Employee employee = restTemplate.getForObject(URL + "/" + id,Employee.class);
+        //return employee;
+        ResponseEntity<Employee> responseEntity = restTemplate.exchange(URL + "/" + id
+                , HttpMethod.GET
+                , null
+                , new ParameterizedTypeReference<Employee>() {
+                });
+        return responseEntity.getBody();
     }
 
     public void saveEmployee(Employee employee){
+        int id = employee.getId();
+        if (id == 0) {
+            ResponseEntity<String> responseEntity =
+                    restTemplate.postForEntity(URL,employee,String.class);
+            System.out.println("New employee was added to DB");
+            System.out.println(responseEntity.getBody());
+        }else{
+            restTemplate.put(URL,employee);
+            System.out.println("Employee with id = " + id + " was updated");
+        }
+
 
     }
 
     public void deleteEmployee(int id){
+
+        restTemplate.delete(URL + "/" + id);
+        System.out.println("Employee with id = " + id + " was deleted");
 
     }
 }
